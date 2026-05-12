@@ -1,402 +1,454 @@
 <script setup>
-import { computed, ref } from 'vue'
-import shotTrackLogo from './assets/shottrack-logo.png'
-import vaccinesCsv from '../vaccines.csv?raw'
+import { computed, ref } from "vue";
+import shotTrackLogo from "./assets/shottrack-logo.png";
+import vaccinesCsv from "../vaccines.csv?raw";
 
 const pages = [
-  { id: 'home', label: '儀表板' },
-  { id: 'search', label: '重點清單' },
-  { id: 'scan', label: '幼兒資料' },
-  { id: 'verify', label: '人工關懷' },
-]
+  { id: "home", label: "儀表板" },
+  { id: "search", label: "重點清單" },
+  { id: "scan", label: "幼兒資料" },
+  { id: "verify", label: "人工關懷" },
+];
 
 const statusStyles = {
-  已完成: 'done',
-  即將到期: 'soon',
-  逾期未完成: 'overdue',
-  待家長回報: 'pending',
-  等待家長確認: 'pending',
-}
+  已完成: "done",
+  即將到期: "soon",
+  逾期未完成: "overdue",
+  待家長回報: "pending",
+  等待家長確認: "pending",
+};
 
-const activePage = ref('home')
-const keyword = ref('')
-const classFilter = ref('')
-const statusFilter = ref('')
-const selectedId = ref('ST-2026-003')
-const editingChildId = ref('')
-const vaccineFormChildId = ref('')
-const childForm = ref(createEmptyChild())
-const vaccineForm = ref(createEmptyVaccine())
+const activePage = ref("home");
+const keyword = ref("");
+const classFilter = ref("");
+const statusFilter = ref("");
+const selectedId = ref("ST-2026-003");
+const editingChildId = ref("");
+const vaccineFormChildId = ref("");
+const childForm = ref(createEmptyChild());
+const vaccineForm = ref(createEmptyVaccine());
 
 const children = ref([
   {
-    id: 'ST-2026-001',
-    name: '林小安',
-    className: '小海星班',
+    id: "ST-2026-001",
+    name: "林小安",
+    className: "小海星班",
     guardians: [
-      { name: '林怡君', phone: '0912-345-678', lineId: 'linmom_0814', isPrimary: true },
+      {
+        name: "林怡君",
+        phone: "0912-345-678",
+        lineId: "linmom_0814",
+        isPrimary: true,
+      },
     ],
-    vaccine: 'MMR 第一劑',
-    dueDate: '2026-05-20',
-    status: '即將到期',
-    reminder: '今日 08:30 已自動推播',
-    lastUpdate: '家長尚未回報接種資料',
-    action: '系統將於到期前 3 天再次提醒',
+    vaccine: "MMR 第一劑",
+    dueDate: "2026-05-20",
+    status: "即將到期",
+    reminder: "今日 08:30 已自動推播",
+    lastUpdate: "家長尚未回報接種資料",
+    action: "系統將於到期前 3 天再次提醒",
   },
   {
-    id: 'ST-2026-002',
-    name: '陳以樂',
-    className: '小太陽班',
+    id: "ST-2026-002",
+    name: "陳以樂",
+    className: "小太陽班",
     guardians: [
-      { name: '陳柏宏', phone: '0922-118-336', lineId: 'chen爸爸', isPrimary: true },
+      {
+        name: "陳柏宏",
+        phone: "0922-118-336",
+        lineId: "chen爸爸",
+        isPrimary: true,
+      },
     ],
-    vaccine: '五合一 第三劑',
-    dueDate: '2026-05-04',
-    status: '已完成',
-    reminder: '不需提醒',
-    lastUpdate: '2026-05-06 家長已上傳接種紀錄',
-    action: '已歸檔',
+    vaccine: "五合一 第三劑",
+    dueDate: "2026-05-04",
+    status: "已完成",
+    reminder: "不需提醒",
+    lastUpdate: "2026-05-06 家長已上傳接種紀錄",
+    action: "已歸檔",
   },
   {
-    id: 'ST-2026-003',
-    name: '黃妮妮',
-    className: '小海星班',
+    id: "ST-2026-003",
+    name: "黃妮妮",
+    className: "小海星班",
     guardians: [
-      { name: '黃雅雯', phone: '0988-765-432', lineId: 'yhw_nini', isPrimary: true },
-      { name: '黃志明', phone: '0977-320-110', lineId: 'nini_dad', isPrimary: false },
+      {
+        name: "黃雅雯",
+        phone: "0988-765-432",
+        lineId: "yhw_nini",
+        isPrimary: true,
+      },
+      {
+        name: "黃志明",
+        phone: "0977-320-110",
+        lineId: "nini_dad",
+        isPrimary: false,
+      },
     ],
-    vaccine: '日本腦炎 第一劑',
-    dueDate: '2026-05-01',
-    status: '逾期未完成',
-    reminder: '已自動推播 3 次',
-    lastUpdate: '超過 11 天未完成回報',
-    action: '建議今日人工關懷',
+    vaccine: "日本腦炎 第一劑",
+    dueDate: "2026-05-01",
+    status: "逾期未完成",
+    reminder: "已自動推播 3 次",
+    lastUpdate: "超過 11 天未完成回報",
+    action: "建議今日人工關懷",
   },
   {
-    id: 'ST-2026-004',
-    name: '吳晴晴',
-    className: '小月亮班',
+    id: "ST-2026-004",
+    name: "吳晴晴",
+    className: "小月亮班",
     guardians: [
-      { name: '吳佳穎', phone: '0966-221-908', lineId: 'sunnywu', isPrimary: true },
+      {
+        name: "吳佳穎",
+        phone: "0966-221-908",
+        lineId: "sunnywu",
+        isPrimary: true,
+      },
     ],
-    vaccine: '水痘 第一劑',
-    dueDate: '2026-05-15',
-    status: '等待家長確認',
-    reminder: '昨日 18:00 已自動推播',
-    lastUpdate: '家長已讀提醒，尚未上傳照片',
-    action: '等待家長確認',
+    vaccine: "水痘 第一劑",
+    dueDate: "2026-05-15",
+    status: "等待家長確認",
+    reminder: "昨日 18:00 已自動推播",
+    lastUpdate: "家長已讀提醒，尚未上傳照片",
+    action: "等待家長確認",
   },
   {
-    id: 'ST-2026-005',
-    name: '張恩恩',
-    className: '小太陽班',
+    id: "ST-2026-005",
+    name: "張恩恩",
+    className: "小太陽班",
     guardians: [
-      { name: '張哲瑋', phone: '0933-852-019', lineId: 'zwchang0602', isPrimary: true },
+      {
+        name: "張哲瑋",
+        phone: "0933-852-019",
+        lineId: "zwchang0602",
+        isPrimary: true,
+      },
     ],
-    vaccine: 'A 型肝炎 第一劑',
-    dueDate: '2026-06-02',
-    status: '已完成',
-    reminder: '不需提醒',
-    lastUpdate: '2026-05-08 已同步健保紀錄',
-    action: '已歸檔',
+    vaccine: "A 型肝炎 第一劑",
+    dueDate: "2026-06-02",
+    status: "已完成",
+    reminder: "不需提醒",
+    lastUpdate: "2026-05-08 已同步健保紀錄",
+    action: "已歸檔",
   },
-])
+]);
 
-const vaccineOptions = parseVaccinesCsv(vaccinesCsv)
+const vaccineOptions = parseVaccinesCsv(vaccinesCsv);
 
 const filteredChildren = computed(() => {
-  const text = keyword.value.trim().toLowerCase()
+  const text = keyword.value.trim().toLowerCase();
 
   return children.value.filter((child) => {
     const matchesKeyword =
       !text ||
       [
-      child.id,
-      child.name,
-      child.className,
-      primaryGuardian(child).name,
-      primaryGuardian(child).phone,
-      child.vaccine,
-      child.status,
+        child.id,
+        child.name,
+        child.className,
+        primaryGuardian(child).name,
+        primaryGuardian(child).phone,
+        child.vaccine,
+        child.status,
       ]
-        .join(' ')
+        .join(" ")
         .toLowerCase()
-        .includes(text)
+        .includes(text);
 
-    const matchesClass = !classFilter.value || child.className === classFilter.value
-    const matchesStatus = !statusFilter.value || child.status === statusFilter.value
+    const matchesClass =
+      !classFilter.value || child.className === classFilter.value;
+    const matchesStatus =
+      !statusFilter.value || child.status === statusFilter.value;
 
-    return matchesKeyword && matchesClass && matchesStatus
-  })
-})
+    return matchesKeyword && matchesClass && matchesStatus;
+  });
+});
 
-const classOptions = computed(() => [...new Set(children.value.map((child) => child.className))])
-const statusOptions = computed(() => [...new Set(children.value.map((child) => child.status))])
+const classOptions = computed(() => [
+  ...new Set(children.value.map((child) => child.className)),
+]);
+const statusOptions = computed(() => [
+  ...new Set(children.value.map((child) => child.status)),
+]);
 const vaccineNameOptions = computed(() => [
   ...new Set(vaccineOptions.map((vaccine) => vaccine.uiName)),
-])
+]);
 const selectedVaccineDoses = computed(() =>
   vaccineOptions.filter((vaccine) => vaccine.uiName === vaccineForm.value.name),
-)
+);
 
 const stats = computed(() =>
-  ['已完成', '即將到期', '逾期未完成', '等待家長確認'].map((status) => ({
+  ["已完成", "即將到期", "逾期未完成", "等待家長確認"].map((status) => ({
     status,
     count: children.value.filter((child) =>
-      status === '等待家長確認'
-        ? ['等待家長確認', '待家長回報'].includes(child.status)
+      status === "等待家長確認"
+        ? ["等待家長確認", "待家長回報"].includes(child.status)
         : child.status === status,
     ).length,
   })),
-)
+);
 
 const focusList = computed(() =>
-  children.value.filter((child) => child.status !== '已完成'),
-)
+  children.value.filter((child) => child.status !== "已完成"),
+);
 
 const autoReminderList = computed(() =>
   children.value.filter((child) =>
-    ['即將到期', '待家長回報', '等待家長確認'].includes(child.status),
+    ["即將到期", "待家長回報", "等待家長確認"].includes(child.status),
   ),
-)
+);
 
 const manualCareList = computed(() =>
-  children.value.filter((child) => child.status === '逾期未完成'),
-)
+  children.value.filter((child) => child.status === "逾期未完成"),
+);
 
 const selectedChild = computed(() =>
   children.value.find((child) => child.id === selectedId.value.trim()),
-)
+);
 
 function getStatusClass(status) {
-  return statusStyles[status] ?? 'pending'
+  return statusStyles[status] ?? "pending";
 }
 
 function primaryGuardian(child) {
   return (
     child.guardians?.find((guardian) => guardian.isPrimary) ??
-    child.guardians?.[0] ?? { name: '', phone: '', lineId: '' }
-  )
+    child.guardians?.[0] ?? { name: "", phone: "", lineId: "" }
+  );
 }
 
 function parseCsvLine(line) {
-  const cells = []
-  let current = ''
-  let insideQuotes = false
+  const cells = [];
+  let current = "";
+  let insideQuotes = false;
 
   for (const char of line) {
     if (char === '"') {
-      insideQuotes = !insideQuotes
-    } else if (char === ',' && !insideQuotes) {
-      cells.push(current.trim())
-      current = ''
+      insideQuotes = !insideQuotes;
+    } else if (char === "," && !insideQuotes) {
+      cells.push(current.trim());
+      current = "";
     } else {
-      current += char
+      current += char;
     }
   }
 
-  cells.push(current.trim())
-  return cells
+  cells.push(current.trim());
+  return cells;
 }
 
 function parseVaccinesCsv(csvText) {
-  const [headerLine, ...rows] = csvText.trim().split(/\r?\n/)
-  const headers = parseCsvLine(headerLine)
-  const uiNameIndex = headers.indexOf('UI_Name')
-  const doseIndex = headers.indexOf('Dose')
-  const codeIndex = headers.indexOf('Sys_Code')
+  const [headerLine, ...rows] = csvText.trim().split(/\r?\n/);
+  const headers = parseCsvLine(headerLine);
+  const uiNameIndex = headers.indexOf("UI_Name");
+  const doseIndex = headers.indexOf("Dose");
+  const codeIndex = headers.indexOf("Sys_Code");
 
   return rows
     .map((row) => {
-      const cells = parseCsvLine(row)
+      const cells = parseCsvLine(row);
 
       return {
         uiName: cells[uiNameIndex],
         dose: cells[doseIndex],
         code: cells[codeIndex],
-      }
+      };
     })
-    .filter((vaccine) => vaccine.uiName && vaccine.dose)
+    .filter((vaccine) => vaccine.uiName && vaccine.dose);
 }
 
 function openCare(id) {
-  selectedId.value = id
-  activePage.value = 'verify'
+  selectedId.value = id;
+  activePage.value = "verify";
 }
 
 function createEmptyChild() {
   return {
-    id: '',
-    name: '',
-    className: '',
+    id: "",
+    name: "",
+    className: "",
     guardians: [createEmptyGuardian(true)],
-    vaccine: '',
-    dueDate: '',
-    status: '等待家長確認',
-    reminder: '尚未發送提醒',
-    lastUpdate: '尚未建立接種時程',
-    action: '建立資料後由系統產生提醒',
-  }
+    vaccine: "",
+    dueDate: "",
+    status: "等待家長確認",
+    reminder: "尚未發送提醒",
+    lastUpdate: "尚未建立接種時程",
+    action: "建立資料後由系統產生提醒",
+  };
 }
 
 function createEmptyGuardian(isPrimary = false) {
   return {
-    name: '',
-    phone: '',
-    lineId: '',
+    name: "",
+    phone: "",
+    lineId: "",
     isPrimary,
-  }
+  };
 }
 
 function createEmptyVaccine() {
   return {
-    name: '',
-    dose: '',
-    date: '',
-    status: '等待家長確認',
-  }
+    name: "",
+    dose: "",
+    date: "",
+    status: "等待家長確認",
+  };
 }
 
 function generateChildId() {
   const nextNumber =
     Math.max(
       0,
-      ...children.value.map((child) => Number(child.id.replace('ST-2026-', '')) || 0),
-    ) + 1
+      ...children.value.map(
+        (child) => Number(child.id.replace("ST-2026-", "")) || 0,
+      ),
+    ) + 1;
 
-  return `ST-2026-${String(nextNumber).padStart(3, '0')}`
+  return `ST-2026-${String(nextNumber).padStart(3, "0")}`;
 }
 
 function startNewChild() {
-  editingChildId.value = ''
-  childForm.value = createEmptyChild()
-  activePage.value = 'scan'
+  editingChildId.value = "";
+  childForm.value = createEmptyChild();
+  activePage.value = "scan";
 }
 
 function editChild(child) {
-  editingChildId.value = child.id
+  editingChildId.value = child.id;
   childForm.value = {
     ...child,
     guardians: child.guardians?.length
       ? child.guardians.map((guardian) => ({ ...guardian }))
       : [createEmptyGuardian(true)],
-  }
-  activePage.value = 'scan'
+  };
+  activePage.value = "scan";
 }
 
 function saveChild() {
-  if (!childForm.value.name || !childForm.value.className) return
+  if (!childForm.value.name || !childForm.value.className) return;
 
   const payload = {
     ...childForm.value,
     id: editingChildId.value || generateChildId(),
     guardians: normalizeGuardians(childForm.value.guardians),
     reminder:
-      childForm.value.status === '已完成'
-        ? '不需提醒'
-        : childForm.value.reminder || '系統將依到期日自動推播',
-    lastUpdate: childForm.value.lastUpdate || '托育端已建立幼兒資料',
-    action: childForm.value.action || '系統自動追蹤接種時程',
-  }
+      childForm.value.status === "已完成"
+        ? "不需提醒"
+        : childForm.value.reminder || "系統將依到期日自動推播",
+    lastUpdate: childForm.value.lastUpdate || "托育端已建立幼兒資料",
+    action: childForm.value.action || "系統自動追蹤接種時程",
+  };
 
-  const existingIndex = children.value.findIndex((child) => child.id === editingChildId.value)
+  const existingIndex = children.value.findIndex(
+    (child) => child.id === editingChildId.value,
+  );
 
   if (existingIndex >= 0) {
-    children.value[existingIndex] = payload
+    children.value[existingIndex] = payload;
   } else {
-    children.value.push(payload)
+    children.value.push(payload);
   }
 
-  selectedId.value = payload.id
-  editChild(payload)
+  selectedId.value = payload.id;
+  editChild(payload);
 }
 
 function normalizeGuardians(guardians) {
   const cleaned = guardians
     .filter((guardian) => guardian.name || guardian.phone || guardian.lineId)
-    .map((guardian, index) => ({ ...guardian, isPrimary: guardian.isPrimary || index === 0 }))
+    .map((guardian, index) => ({
+      ...guardian,
+      isPrimary: guardian.isPrimary || index === 0,
+    }));
 
   if (!cleaned.length) {
-    return [createEmptyGuardian(true)]
+    return [createEmptyGuardian(true)];
   }
 
   if (!cleaned.some((guardian) => guardian.isPrimary)) {
-    cleaned[0].isPrimary = true
+    cleaned[0].isPrimary = true;
   }
 
-  return cleaned
+  return cleaned;
 }
 
 function addGuardian() {
-  childForm.value.guardians.push(createEmptyGuardian(false))
+  childForm.value.guardians.push(createEmptyGuardian(false));
 }
 
 function removeGuardian(index) {
-  if (childForm.value.guardians.length === 1) return
+  if (childForm.value.guardians.length === 1) return;
 
-  const wasPrimary = childForm.value.guardians[index].isPrimary
-  childForm.value.guardians.splice(index, 1)
+  const wasPrimary = childForm.value.guardians[index].isPrimary;
+  childForm.value.guardians.splice(index, 1);
 
   if (wasPrimary) {
-    childForm.value.guardians[0].isPrimary = true
+    childForm.value.guardians[0].isPrimary = true;
   }
 }
 
 function setPrimaryGuardian(index) {
-  childForm.value.guardians = childForm.value.guardians.map((guardian, guardianIndex) => ({
-    ...guardian,
-    isPrimary: guardianIndex === index,
-  }))
+  childForm.value.guardians = childForm.value.guardians.map(
+    (guardian, guardianIndex) => ({
+      ...guardian,
+      isPrimary: guardianIndex === index,
+    }),
+  );
 }
 
 function startVaccineForm(child) {
-  vaccineFormChildId.value = child.id
-  vaccineForm.value = createEmptyVaccine()
-  activePage.value = 'search'
+  vaccineFormChildId.value = child.id;
+  vaccineForm.value = createEmptyVaccine();
+  activePage.value = "search";
 }
 
 function saveVaccine() {
-  const child = children.value.find((item) => item.id === vaccineFormChildId.value)
+  const child = children.value.find(
+    (item) => item.id === vaccineFormChildId.value,
+  );
 
-  if (!child || !vaccineForm.value.name || !vaccineForm.value.dose || !vaccineForm.value.date) {
-    return
+  if (
+    !child ||
+    !vaccineForm.value.name ||
+    !vaccineForm.value.dose ||
+    !vaccineForm.value.date
+  ) {
+    return;
   }
 
-  child.vaccine = `${vaccineForm.value.name} ${vaccineForm.value.dose}`
-  child.dueDate = vaccineForm.value.date
-  child.status = vaccineForm.value.status
-  child.reminder = '新增接種資訊後，系統等待家長確認'
-  child.lastUpdate = `${vaccineForm.value.date} 已建立接種資訊`
-  child.action = '等待家長確認接種紀錄'
+  child.vaccine = `${vaccineForm.value.name} ${vaccineForm.value.dose}`;
+  child.dueDate = vaccineForm.value.date;
+  child.status = vaccineForm.value.status;
+  child.reminder = "新增接種資訊後，系統等待家長確認";
+  child.lastUpdate = `${vaccineForm.value.date} 已建立接種資訊`;
+  child.action = "等待家長確認接種紀錄";
   child.vaccinations = [
     ...(child.vaccinations ?? []),
     {
       ...vaccineForm.value,
       createdAt: new Date().toISOString(),
     },
-  ]
+  ];
 
-  vaccineForm.value = createEmptyVaccine()
+  vaccineForm.value = createEmptyVaccine();
 }
 
 function updateSelectedVaccineName() {
-  vaccineForm.value.dose = ''
+  vaccineForm.value.dose = "";
 }
 
 function markAsCompleted(child) {
-  child.status = '已完成'
-  child.reminder = '不需提醒'
-  child.lastUpdate = '剛剛已由托育端確認家長回報'
-  child.action = '已歸檔'
+  child.status = "已完成";
+  child.reminder = "不需提醒";
+  child.lastUpdate = "剛剛已由托育端確認家長回報";
+  child.action = "已歸檔";
 }
 
 function markCareDone() {
-  if (!selectedChild.value) return
+  if (!selectedChild.value) return;
 
-  selectedChild.value.status = '等待家長確認'
-  selectedChild.value.reminder = '人工關懷後已重新發送推播'
-  selectedChild.value.lastUpdate = '托育人員已完成電話關懷'
-  selectedChild.value.action = '等待家長確認'
+  selectedChild.value.status = "等待家長確認";
+  selectedChild.value.reminder = "人工關懷後已重新發送推播";
+  selectedChild.value.lastUpdate = "托育人員已完成電話關懷";
+  selectedChild.value.action = "等待家長確認";
 }
 </script>
 
@@ -406,7 +458,7 @@ function markCareDone() {
       <div class="brand">
         <img :src="shotTrackLogo" alt="ShotTrack logo" />
         <div>
-          <strong>一針不ShotTrack</strong>
+          <strong>一針不漏ShotTrack</strong>
           <small>托育端疫苗接種追蹤</small>
         </div>
       </div>
@@ -428,7 +480,7 @@ function markCareDone() {
       <header class="topbar">
         <div class="title-block">
           <p class="label">自動化、即時化、低負擔</p>
-          <h1>一針不ShotTrack 托育端疫苗接種追蹤</h1>
+          <h1>一針不漏ShotTrack 托育端疫苗接種追蹤</h1>
         </div>
         <img class="topbar-logo" :src="shotTrackLogo" alt="" />
         <div class="operator">
@@ -448,7 +500,11 @@ function markCareDone() {
           </div>
 
           <div class="stats">
-            <div v-for="item in stats" :key="item.status" :class="getStatusClass(item.status)">
+            <div
+              v-for="item in stats"
+              :key="item.status"
+              :class="getStatusClass(item.status)"
+            >
               <span>{{ item.status }}</span>
               <strong>{{ item.count }}</strong>
             </div>
@@ -461,20 +517,33 @@ function markCareDone() {
               <p class="label">Priority List</p>
               <h2>今日重點清單</h2>
             </div>
-            <button type="button" @click="activePage = 'search'">查看全部</button>
+            <button type="button" @click="activePage = 'search'">
+              查看全部
+            </button>
           </div>
 
           <div class="task-list">
-            <article v-for="child in focusList" :key="child.id" class="task-row">
+            <article
+              v-for="child in focusList"
+              :key="child.id"
+              class="task-row"
+            >
               <div>
                 <span class="badge" :class="getStatusClass(child.status)">
                   {{ child.status }}
                 </span>
                 <h3>{{ child.name }}</h3>
-                <p>{{ child.className }} · {{ child.vaccine }} · 接種/到期時間 {{ child.dueDate }}</p>
+                <p>
+                  {{ child.className }} · {{ child.vaccine }} · 接種/到期時間
+                  {{ child.dueDate }}
+                </p>
               </div>
               <div class="record-buttons">
-                <button class="secondary" type="button" @click="startVaccineForm(child)">
+                <button
+                  class="secondary"
+                  type="button"
+                  @click="startVaccineForm(child)"
+                >
                   新增疫苗資訊
                 </button>
                 <button type="button" @click="openCare(child.id)">處理</button>
@@ -518,13 +587,21 @@ function markCareDone() {
             />
             <select v-model="classFilter" aria-label="依班級篩選">
               <option value="">全部班級</option>
-              <option v-for="className in classOptions" :key="className" :value="className">
+              <option
+                v-for="className in classOptions"
+                :key="className"
+                :value="className"
+              >
                 {{ className }}
               </option>
             </select>
             <select v-model="statusFilter" aria-label="依疫苗狀態篩選">
               <option value="">全部疫苗狀態</option>
-              <option v-for="status in statusOptions" :key="status" :value="status">
+              <option
+                v-for="status in statusOptions"
+                :key="status"
+                :value="status"
+              >
                 {{ status }}
               </option>
             </select>
@@ -541,14 +618,20 @@ function markCareDone() {
             <p class="label">Vaccination</p>
             <h2>新增幼兒接種資訊</h2>
             <p>
-              {{ children.find((child) => child.id === vaccineFormChildId)?.name }}
+              {{
+                children.find((child) => child.id === vaccineFormChildId)?.name
+              }}
               · 目前狀態預設等待家長確認
             </p>
           </div>
 
           <label>
             <span>接種名稱</span>
-            <select v-model="vaccineForm.name" required @change="updateSelectedVaccineName">
+            <select
+              v-model="vaccineForm.name"
+              required
+              @change="updateSelectedVaccineName"
+            >
               <option value="" disabled>選擇接種名稱</option>
               <option
                 v-for="name in vaccineNameOptions"
@@ -561,7 +644,11 @@ function markCareDone() {
           </label>
           <label>
             <span>接種劑次</span>
-            <select v-model="vaccineForm.dose" required :disabled="!vaccineForm.name">
+            <select
+              v-model="vaccineForm.dose"
+              required
+              :disabled="!vaccineForm.name"
+            >
               <option value="" disabled>選擇接種劑次</option>
               <option
                 v-for="vaccine in selectedVaccineDoses"
@@ -585,14 +672,22 @@ function markCareDone() {
 
           <div class="form-actions">
             <button type="submit">儲存接種資訊</button>
-            <button class="secondary" type="button" @click="vaccineFormChildId = ''">
+            <button
+              class="secondary"
+              type="button"
+              @click="vaccineFormChildId = ''"
+            >
               取消
             </button>
           </div>
         </form>
 
         <div class="table-list">
-          <article v-for="child in filteredChildren" :key="child.id" class="record">
+          <article
+            v-for="child in filteredChildren"
+            :key="child.id"
+            class="record"
+          >
             <div class="record-main">
               <span class="badge" :class="getStatusClass(child.status)">
                 {{ child.status }}
@@ -611,10 +706,16 @@ function markCareDone() {
               <small>{{ child.action }}</small>
             </div>
             <div class="record-buttons">
-              <button class="secondary" type="button" @click="startVaccineForm(child)">
+              <button
+                class="secondary"
+                type="button"
+                @click="startVaccineForm(child)"
+              >
                 新增疫苗資訊
               </button>
-              <button class="secondary" type="button" @click="editChild(child)">修改</button>
+              <button class="secondary" type="button" @click="editChild(child)">
+                修改
+              </button>
               <button type="button" @click="openCare(child.id)">查看</button>
             </div>
           </article>
@@ -626,19 +727,27 @@ function markCareDone() {
           <div class="panel-title">
             <div>
               <p class="label">Child Profile</p>
-              <h2>{{ editingChildId ? '修改小朋友資料' : '新增小朋友資料' }}</h2>
+              <h2>
+                {{ editingChildId ? "修改小朋友資料" : "新增小朋友資料" }}
+              </h2>
             </div>
-            <button class="secondary" type="button" @click="startNewChild">清空表單</button>
+            <button class="secondary" type="button" @click="startNewChild">
+              清空表單
+            </button>
           </div>
 
           <form class="child-form" @submit.prevent="saveChild">
             <div class="system-id full-width">
               <span>系統編號</span>
-              <strong>{{ editingChildId || '儲存後自動生成' }}</strong>
+              <strong>{{ editingChildId || "儲存後自動生成" }}</strong>
             </div>
             <label>
               <span>幼兒姓名</span>
-              <input v-model="childForm.name" required placeholder="輸入幼兒姓名" />
+              <input
+                v-model="childForm.name"
+                required
+                placeholder="輸入幼兒姓名"
+              />
             </label>
             <label>
               <span>班級</span>
@@ -689,15 +798,27 @@ function markCareDone() {
                 </div>
                 <label>
                   <span>家長姓名</span>
-                  <input v-model="guardian.name" required placeholder="輸入家長姓名" />
+                  <input
+                    v-model="guardian.name"
+                    required
+                    placeholder="輸入家長姓名"
+                  />
                 </label>
                 <label>
                   <span>家長電話</span>
-                  <input v-model="guardian.phone" required placeholder="例如 0912-345-678" />
+                  <input
+                    v-model="guardian.phone"
+                    required
+                    placeholder="例如 0912-345-678"
+                  />
                 </label>
                 <label>
                   <span>家長 Line ID</span>
-                  <input v-model="guardian.lineId" required placeholder="例如 parent_line_id" />
+                  <input
+                    v-model="guardian.lineId"
+                    required
+                    placeholder="例如 parent_line_id"
+                  />
                 </label>
                 <button
                   v-if="childForm.guardians.length > 1"
@@ -711,15 +832,23 @@ function markCareDone() {
             </section>
             <label class="full-width">
               <span>家長綁定與提醒紀錄</span>
-              <input v-model="childForm.reminder" placeholder="例如 今日 08:30 已自動推播" />
+              <input
+                v-model="childForm.reminder"
+                placeholder="例如 今日 08:30 已自動推播"
+              />
             </label>
             <label class="full-width">
               <span>備註</span>
-              <input v-model="childForm.lastUpdate" placeholder="例如 家長已讀提醒，尚未上傳照片" />
+              <input
+                v-model="childForm.lastUpdate"
+                placeholder="例如 家長已讀提醒，尚未上傳照片"
+              />
             </label>
 
             <div class="form-actions">
-              <button type="submit">{{ editingChildId ? '儲存修改' : '新增小朋友' }}</button>
+              <button type="submit">
+                {{ editingChildId ? "儲存修改" : "新增小朋友" }}
+              </button>
             </div>
           </form>
         </article>
@@ -736,27 +865,27 @@ function markCareDone() {
             <span class="badge" :class="getStatusClass(childForm.status)">
               {{ childForm.status }}
             </span>
-            <h3>{{ childForm.name || '尚未輸入姓名' }}</h3>
+            <h3>{{ childForm.name || "尚未輸入姓名" }}</h3>
             <dl>
               <div>
                 <dt>班級</dt>
-                <dd>{{ childForm.className || '尚未綁定' }}</dd>
+                <dd>{{ childForm.className || "尚未綁定" }}</dd>
               </div>
               <div>
                 <dt>家長</dt>
-                <dd>{{ primaryGuardian(childForm).name || '尚未綁定' }}</dd>
+                <dd>{{ primaryGuardian(childForm).name || "尚未綁定" }}</dd>
               </div>
               <div>
                 <dt>電話</dt>
-                <dd>{{ primaryGuardian(childForm).phone || '尚未填寫' }}</dd>
+                <dd>{{ primaryGuardian(childForm).phone || "尚未填寫" }}</dd>
               </div>
               <div>
                 <dt>Line ID</dt>
-                <dd>{{ primaryGuardian(childForm).lineId || '尚未填寫' }}</dd>
+                <dd>{{ primaryGuardian(childForm).lineId || "尚未填寫" }}</dd>
               </div>
               <div>
                 <dt>系統提醒</dt>
-                <dd>{{ childForm.reminder || '儲存後依狀態產生提醒' }}</dd>
+                <dd>{{ childForm.reminder || "儲存後依狀態產生提醒" }}</dd>
               </div>
             </dl>
           </div>
@@ -814,8 +943,14 @@ function markCareDone() {
           </dl>
 
           <div class="care-actions">
-            <button type="button" @click="markCareDone">已人工關懷並重發提醒</button>
-            <button class="secondary" type="button" @click="markAsCompleted(selectedChild)">
+            <button type="button" @click="markCareDone">
+              已人工關懷並重發提醒
+            </button>
+            <button
+              class="secondary"
+              type="button"
+              @click="markAsCompleted(selectedChild)"
+            >
               家長已回報，直接歸檔
             </button>
           </div>
@@ -833,11 +968,20 @@ function markCareDone() {
 :global(body) {
   margin: 0;
   background:
-    radial-gradient(circle at 18% 8%, rgba(174, 217, 240, 0.55), transparent 34%),
+    radial-gradient(
+      circle at 18% 8%,
+      rgba(174, 217, 240, 0.55),
+      transparent 34%
+    ),
     linear-gradient(135deg, #eef8fd 0%, #f9fcfb 52%, #fff3f5 100%);
   color: #213547;
   font-family:
-    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
     sans-serif;
 }
 
@@ -891,7 +1035,11 @@ select:focus {
   padding: 24px 18px;
   border-right: 1px solid rgba(70, 150, 191, 0.18);
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(221, 241, 249, 0.86)),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.92),
+      rgba(221, 241, 249, 0.86)
+    ),
     #f5fbfe;
   color: #1f5f8f;
 }
@@ -961,7 +1109,11 @@ nav button:hover {
   border: 1px solid rgba(70, 150, 191, 0.18);
   border-radius: 8px;
   background:
-    linear-gradient(100deg, rgba(255, 255, 255, 0.92), rgba(232, 247, 253, 0.86)),
+    linear-gradient(
+      100deg,
+      rgba(255, 255, 255, 0.92),
+      rgba(232, 247, 253, 0.86)
+    ),
     #fff;
   box-shadow: 0 12px 32px rgba(70, 150, 191, 0.12);
   padding: 18px;
